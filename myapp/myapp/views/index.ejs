@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"
+    />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" href="themes/theme.css" />
+    <link rel="stylesheet" href="themes/theme.min.css" />
+  </head>
+
+  <body>
+    <div data-role="page">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+      <!-- /header -->
+
+      <div role="main" class="ui-content">
+        <div class="ui-grid-solo">
+          <div class="ui-block-a" style="padding: 200px;">
+            <h1>Login</h1>
+            <p>Login with your username and password</p>
+
+            Username
+            <input type="text" id="username" name="username" />
+            <br />
+            Password
+            <input type="text" id="password" name="password" />
+            <br />
+            <button id="login">Login</button>
+            <p>
+              Don't have an account?
+              <a href="#register" class="ui-link" style="color: black"
+                >Register</a
+              >
+            </p>
+
+            <!--Testing the output -->
+            <!--<div id="output"></div>-->
+          </div>
+        </div>
+
+        <script>
+          $("#login").click(function () {
+            // Get the values
+            var un = $("#username").val();
+
+            if (un == "") {
+              alert("too short");
+            } else {
+              // Send the data
+              $.post("/login", { username: un }).done(function (data) {
+                if (data.includes("customer")) {
+                  window.location = "/#customer";
+                } else if (data.includes("manager")) {
+                  // get the data
+                  $.get("/getManagerData", function (data) {
+                    $("#managerOutput").html(data);
+                  });
+
+                  // redirect to the manager page
+                  window.location = "/#manager";
+                } else if (data.includes("driver")) {
+                  window.location = "/#driver";
+                } else if (data.includes("cook")) {
+                  $.get("/getCookData", function (data) {
+                    $("#cookoutput").html(data);
+                  });
+
+                  window.location = "/#cook";
+                }
+                $("#output").html(data);
+              });
+            }
+          });
+
+          function addToCart(itemName) {
+            // finding out the name of the ITEM we are adding
+            var item = itemName;
+            console.log(item);
+
+            // dynamically find out the qty
+            var qty = $("#" + item)
+              .children("option:selected")
+              .val();
+            console.log(qty);
+
+            // search the cart and see if we already added
+            // the item. If we did, remove the old qty.
+
+            myCart.forEach(function (itemCurrent, index, array) {
+              if (itemCurrent.includes(item)) {
+                console.log("Removing previous reference to " + item);
+                myCart.pop(index);
+              }
+            });
+
+            // add the item to the cart
+            myCart.push(item + "-" + qty);
+
+            alert(myCart);
+          }
+
+          $("#login");
+        </script>
+      </div>
+      <!-- /content -->
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+      <!-- /footer -->
+    </div>
+    <!-- /page -->
+
+    <div data-role="page" id="register">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+
+      <div class="ui-grid-a" style="padding: 200px">
+        <h1>Register</h1>
+        <p>Register with a new username and password</p>
+
+        Username
+        <input type="text" id="regusername" name="regusername" />
+        <br />
+        Password
+        <input type="text" id="regpassword" name="regpassword" />
+        <br />
+        <button id="regbutton">Register</button>
+
+        <!--Testing the output -->
+        <div id="output"></div>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+
+      <script>
+        $("#regbutton").click(function () {
+          var un = $("#regusername").val();
+          var ps = $("#regpassword").val();
+          $.post("/registernewuser", { username: un, password: ps }).done(
+            function (data) {
+              alert(data);
+            }
+          );
+        });
+      </script>
+    </div>
+
+    <div data-role="page" id="customer">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+      <h2 style="text-align: center;">Customer Page</h2>
+      <script>
+        var myCart = [];
+      </script>
+
+      <div class="ui-grid-a">
+        <div class="ui-grid-solo" style="padding: 100px">
+          <label for="select-native-2">BBQ Pizza</label>
+          <div class="ui-field-contain">
+            <select
+              id="bbq_pizza_qty"
+              name="select-native-2"
+              id="select-native-2"
+              data-mini="true"
+            >
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button id="addtocart" onclick="addToCart('bbq_pizza_qty')">
+              Add To Cart
+            </button>
+          </div>
+        </div>
+
+        <div class="ui-grid-solo"></div>
+
+        <div class="ui-grid-solo" style="padding: 100px">
+          <label for="select-native-2">NY Pizza</label>
+          <div class="ui-field-contain">
+            <select
+              id="ny_pizza_qty"
+              name="select-native-2"
+              id="select-native-2"
+              data-mini="true"
+            >
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button onclick="addToCart('ny_pizza_qty')">Add To Cart</button>
+          </div>
+        </div>
+
+        <div class="ui-grid-solo" style="padding: 100px">
+          <label for="select-native-2">Kebab</label>
+          <div class="ui-field-contain">
+            <select
+              id="kebab_qty"
+              name="select-native-2"
+              id="select-native-2"
+              data-mini="true"
+            >
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button onclick="addToCart('kebab_qty')">Add To Cart</button>
+          </div>
+        </div>
+
+        <div class="ui-grid-solo" style="padding: 100px">
+          <label for="select-native-2">Chicken Balls</label>
+          <div class="ui-field-contain">
+            <select
+              id="chicken_balls_qty"
+              name="select-native-2"
+              id="select-native-2"
+              data-mini="true"
+            >
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button onclick="addToCart('chicken_balls_qty')">
+              Add To Cart
+            </button>
+          </div>
+        </div>
+
+        <div class="ui-grid-solo" style="padding: 100px">
+          <label for="select-native-2">BBQ Spare Ribs</label>
+          <div class="ui-field-contain">
+            <select
+              id="bbq_spare_ribs_qty"
+              name="select-native-2"
+              id="select-native-2"
+              data-mini="true"
+            >
+              <option value=""></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+            <button onclick="addToCart('bbq_spare_ribs_qty')">
+              Add To Cart
+            </button>
+          </div>
+        </div>
+        <button id="checkout1">Checkout</button>
+      </div>
+
+      <script>
+        $("#checkout1").click(function () {
+          console.log("called");
+
+          var buffer = ""; //store the output
+          var str = myCart.toString();
+          var items = str.split(",");
+
+          for (var i = 0; i < items.length; i++) {
+            console.log("item " + items[i]);
+            var productName = items[i].split("-")[0];
+            var productQty = items[i].split("-")[1];
+
+            buffer +=
+              "<b>Product name: <b> " +
+              productName +
+              "<b>Qty:</b>" +
+              productQty +
+              "<br>";
+          }
+
+          $("#orderOutput").html(buffer);
+
+          window.location = "/#reviewOrder";
+        });
+      </script>
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+    </div>
+
+    <div data-role="page" id="manager">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+      <h2 style="text-align: center;">Manager Page</h2>
+
+      <div id="managerOutput" style="display: flex; justify-content: center;"></div>
+
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+    </div>
+
+    <div data-role="page" id="cook">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+      <h2 style="text-align: center;">Cook page</h2>
+      <div class="ui-field-contain" id="cookoutput" style="display: flex; align-items: center; flex-direction: column;"></div>
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+    </div>
+
+    <div data-role="page" id="driver">Driver page</div>
+
+    <script>
+      function updateDB(id) {
+        alert(id);
+
+        var qty = $("#" + id).val();
+        alert(qty);
+
+        $.post("/updateDB", { id: id, qty: qty }).done(function (data) {
+          alert("'Data Loaded: " + data);
+        });
+      }
+    </script>
+
+    <div data-role="page" id="reviewOrder">
+      <div
+        data-role="header"
+        style="
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-image: url(images/food.jpg);
+          padding-bottom: 100px;
+        "
+      >
+        <div class="ui-grid-solo">
+          <img src="images\Just-Eat-Logo.png" style="max-width: 50%" />
+        </div>
+      </div>
+
+      Review order
+      <p></p>
+      <div id="orderOutput"></div>
+
+      <button id="pay">Pay</button>
+
+      <div data-role="footer" data-position="fixed">
+        <h4>Copyright © 2021 Just Eat All rights reserved.</h4>
+      </div>
+    </div>
+    <script>
+      $("#pay").click(function () {
+        // call jquery post
+        // to the server side.
+        // send the data
+
+        $.post("/putindb", { cart: myCart.toString() }).done(function (data) {
+          alert(data);
+        });
+      });
+    </script>
+  </body>
+</html>
